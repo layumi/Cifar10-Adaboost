@@ -8,6 +8,7 @@
 """Utility functions and classes"""
 
 import sys
+import torch
 
 
 def parameters_string(module):
@@ -88,7 +89,12 @@ class AverageMeter:
         self.avg = self.sum / self.count
 
     def __format__(self, format):
-        return "{self.val:{format}} ({self.avg:{format}})".format(self=self, format=format)
+        #return "{self.val:{format}} ({self.avg:{format}})".format(self=self, format=format)
+        #return "{self.val:%.2f self.avg:%.2f"%(self.val, self.avg)
+        #if torch.is_tensor(self.val):
+        #    return "self.val:%.2f self.avg:%.2f"%(self.val[0], self.avg[0])
+        #else:
+        return "self.val:%.2f self.avg:%.2f"%(self.val, self.avg)
 
 
 def export(fn):
