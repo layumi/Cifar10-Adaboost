@@ -358,8 +358,8 @@ def validate(eval_loader, model, log, global_step, epoch):
                 'Prec@5 {meters[top5]:.3f}'.format(
                     i, len(eval_loader), meters=meters))
 
-    #LOG.info(' * Prec@1 {top1.avg:.3f}\tPrec@5 {top5.avg:.3f}'
-    #      .format(top1=meters['top1'], top5=meters['top5']))
+    LOG.info(' * Prec@1 {top1.avg:.3f}\tPrec@5 {top5.avg:.3f}'
+          .format(top1=meters['top1'], top5=meters['top5']))
     #log.record(epoch, {
     #    'step': global_step,
     #    **meters.values(),
