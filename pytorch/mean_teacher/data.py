@@ -7,6 +7,7 @@
 
 """Functions to load data from folders and augment it"""
 
+import torch
 import itertools
 import logging
 import os.path
@@ -131,6 +132,40 @@ class TwoStreamBatchSampler(Sampler):
     def __len__(self):
         return len(self.primary_indices) // self.primary_batch_size
 
+
+class ADATwoStreamBatchSampler(Sampler):
+    """Iterate two sets of indices
+
+    An 'epoch' is one iteration through the primary indices.
+    During the epoch, the secondary indices are iterated through
+    as many times as needed.
+
+    with weight
+    """
+    def __init__(self, primary_indices, secondary_indices, batch_size, secondary_batch_size, weight):
+        self.primary_indices = primary_indices
+        self.secondary_indices = secondary_indices
+        self.secondary_batch_size = secondary_batch_size
+        self.primary_batch_size = batch_size - secondary_batch_size
+        self.weight = weight
+
+        assert len(self.primary_indices) >= self.primary_batch_size > 0
+        assert len(self.secondary_indices) >= self.secondary_batch_size > 0
+
+    def __iter__(self):
+        #primary_iter = iterate_once(self.primary_indices)
+        primary_index = torch.multinomial(self.weight, num_samples = len(self.primary_indices), replacement = True)
+        primary_iter = np.take(self.primary_indices , primary_index)
+        secondary_iter = iterate_eternally(self.secondary_indices)
+        return (
+            primary_batch + secondary_batch
+            for (primary_batch, secondary_batch)
+            in  zip(grouper(primary_iter, self.primary_batch_size),
+                    grouper(secondary_iter, self.secondary_batch_size))
+        )
+
+    def __len__(self):
+        return len(self.primary_indices) // self.primary_batch_size
 
 def iterate_once(iterable):
     return np.random.permutation(iterable)

@@ -8,6 +8,7 @@
 import re
 import argparse
 import os
+import tqdm
 import shutil
 import time
 import math
@@ -47,7 +48,7 @@ def main(context):
 
     dataset_config = datasets.__dict__[args.dataset]()
     num_classes = dataset_config.pop('num_classes')
-    train_loader, eval_loader = create_data_loaders(**dataset_config, args=args)
+    train_loader, eval_loader, unlabel_loader, previous_weights = create_data_loaders(**dataset_config, args=args)
 
     def create_model(ema=False):
         LOG.info("=> creating {pretrained}{ema}model '{arch}'".format(
@@ -101,8 +102,20 @@ def main(context):
     for epoch in range(args.start_epoch, args.epochs):
         start_time = time.time()
         # train for one epoch
+        weights = update_data_weights(unlabel_loader, model, ema_model, previous_weights)
         train(train_loader, model, ema_model, optimizer, epoch, training_log)
         LOG.info("--- training epoch in %s seconds ---" % (time.time() - start_time))
+
+
+        # Update train loader according to the KL 
+        batch_sampler = data.ADATwoStreamBatchSampler(
+            unlabeled_idxs, labeled_idxs, args.batch_size, args.labeled_batch_size, weights)
+        previous_weights = weights
+        train_loader = torch.utils.data.DataLoader(dataset,
+                                               batch_sampler=batch_sampler,
+                                               num_workers=args.workers,
+                                               pin_memory=True)
+
 
         if args.evaluation_epochs and (epoch + 1) % args.evaluation_epochs == 0:
             start_time = time.time()
@@ -127,6 +140,21 @@ def main(context):
                 'optimizer' : optimizer.state_dict(),
             }, is_best, checkpoint_path, epoch + 1)
 
+def update_data_weights(unlabel_loader, model, ema_model, previous_weights): 
+    sm = torch.nn.Softmax(dim = 1)
+    log_sm = torch.nn.LogSoftmax(dim = 1)
+    with tqdm.tqdm(unlabel_loader, ascii=True) as tq:
+        for images, _ in tq:
+            print(images[0].shape) 
+            print(images[1].shape) 
+            pred1 = model(images)
+            pred2 = ema_model(images)
+            variance = torch.sum(kl_distance(log_sm(pred1), sm(pred2)), dim=1)
+            mean_variance = torch.mean( torch.mean(variance, dim=2), dim=1)
+            mean_variance = mean_variance.cpu()
+            weight = torch.cat( (weight, mean_variance), dim = 0)
+    weight = (sm(weight) + previous_weights)*0.5
+    return weight
 
 def parse_dict_args(**kwargs):
     global args
@@ -160,13 +188,14 @@ def create_data_loaders(train_transformation,
         with open(args.labels) as f:
             labels = dict(line.split(' ') for line in f.read().splitlines())
         labeled_idxs, unlabeled_idxs = data.relabel_dataset(dataset, labels)
-
+    target_number = len(unlabeled_idxs)
+    previous_weights = torch.FloatTensor( [1/target_number]*target_number )
     if args.exclude_unlabeled:
         sampler = SubsetRandomSampler(labeled_idxs)
         batch_sampler = BatchSampler(sampler, args.batch_size, drop_last=True)
     elif args.labeled_batch_size:
-        batch_sampler = data.TwoStreamBatchSampler(
-            unlabeled_idxs, labeled_idxs, args.batch_size, args.labeled_batch_size)
+        batch_sampler = data.ADATwoStreamBatchSampler(
+            unlabeled_idxs, labeled_idxs, args.batch_size, args.labeled_batch_size, previous_weights)
     else:
         assert False, "labeled batch size {}".format(args.labeled_batch_size)
 
@@ -183,7 +212,14 @@ def create_data_loaders(train_transformation,
         pin_memory=True,
         drop_last=False)
 
-    return train_loader, eval_loader
+    sampler = SubsetRandomSampler(unlabeled_idxs)
+    batch_sampler = BatchSampler(sampler, args.batch_size, drop_last=True) # not shuffle
+    unlabel_loader = torch.utils.data.DataLoader(dataset,
+                                               batch_sampler=batch_sampler,
+                                               num_workers=args.workers,
+                                               pin_memory=True)
+
+    return train_loader, eval_loader, unlabel_loader, previous_weights
 
 
 def update_ema_variables(model, ema_model, alpha, global_step):
