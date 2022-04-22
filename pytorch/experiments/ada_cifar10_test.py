@@ -49,6 +49,10 @@ def parameters():
         'lr_rampup': 0,
         'base_lr': 0.05,
         'nesterov': True,
+
+        # ada
+        'gap': 2,
+
     }
 
     # 4000 labels:

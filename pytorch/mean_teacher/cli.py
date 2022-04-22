@@ -83,6 +83,7 @@ def create_parser():
                         help='evaluate model on evaluation set')
     parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                         help='use pre-trained model')
+    parser.add_argument('--gap', default=2, type=int)
     return parser
 
 

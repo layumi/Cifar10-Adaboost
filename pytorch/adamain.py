@@ -104,14 +104,15 @@ def main(context):
     for epoch in range(args.start_epoch, args.epochs):
         start_time = time.time()
         # train for one epoch
-        weights = update_data_weights(unlabel_loader, model, ema_model, previous_weights)
         train(train_loader, model, ema_model, optimizer, epoch, training_log)
         LOG.info("--- training epoch in %s seconds ---" % (time.time() - start_time))
 
 
         # Update train loader according to the KL 
-        train_loader, eval_loader, unlabel_loader = create_data_loaders(**dataset_config, weights = weights, args=args)
-        previous_weights = weights
+        if (epoch + 1) % args.gap ==0:
+            weights = update_data_weights(unlabel_loader, model, ema_model, previous_weights)
+            train_loader, eval_loader, unlabel_loader = create_data_loaders(**dataset_config, weights = weights, args=args)
+            previous_weights = weights
 
         if args.evaluation_epochs and (epoch + 1) % args.evaluation_epochs == 0:
             start_time = time.time()
