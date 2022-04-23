@@ -29,6 +29,7 @@ from mean_teacher.run_context import RunContext
 from mean_teacher.data import NO_LABEL
 from mean_teacher.utils import *
 
+import swa_utils
 
 LOG = logging.getLogger('main')
 
@@ -118,7 +119,7 @@ def main(context):
             start_time = time.time()
             LOG.info("Evaluating the primary model:")
             prec1 = validate(eval_loader, model, validation_log, global_step, epoch + 1)
-            LOG.info("Evaluating the EMA model:")
+            LOG.info("Evaluating the EMA model:")            
             ema_prec1 = validate(eval_loader, ema_model, ema_validation_log, global_step, epoch + 1)
             LOG.info("--- validation in %s seconds ---" % (time.time() - start_time))
             is_best = ema_prec1 > best_prec1
