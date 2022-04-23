@@ -84,6 +84,7 @@ def create_parser():
     parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                         help='use pre-trained model')
     parser.add_argument('--gap', default=2, type=int)
+    parser.add_argument('--alpha', default=1.0, type=float)
     return parser
 
 
