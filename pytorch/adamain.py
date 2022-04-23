@@ -136,6 +136,9 @@ def main(context):
                 'best_prec1': best_prec1,
                 'optimizer' : optimizer.state_dict(),
             }, is_best, checkpoint_path, epoch + 1)
+        f = checkpoint_path+'/result.txt' 
+        with open(f,"a+") as file:
+            file.write('epoch: %d\t'%(epoch + 1) + 'best_prec1: %.2f'%best_prec1+"\n") 
 
 def update_data_weights(unlabel_loader, model, ema_model, previous_weights): 
     weight = torch.FloatTensor()
