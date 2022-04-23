@@ -126,7 +126,9 @@ def main(context):
                 'best_prec1': best_prec1,
                 'optimizer' : optimizer.state_dict(),
             }, is_best, checkpoint_path, epoch + 1)
-
+        f = checkpoint_path+'/result.txt'
+        with open(f,"a+") as file:
+            file.write('epoch: %d\t'%(epoch + 1) + 'best_prec1: %.2f'%best_prec1+"\n")
 
 def parse_dict_args(**kwargs):
     global args
