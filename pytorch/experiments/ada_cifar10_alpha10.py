@@ -52,7 +52,7 @@ def parameters():
 
         # ada
         'gap': 2,
-        'alpha': 1,
+        'alpha': 10,
     }
 
     # 4000 labels:

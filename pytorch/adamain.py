@@ -110,8 +110,8 @@ def main(context):
 
 
         # Update train loader according to the KL 
-        if (epoch + 1) % args.gap ==0:
-            weights = update_data_weights(unlabel_loader, model, ema_model, previous_weights)
+        if epoch>0 and (epoch + 1) % args.gap ==0:
+            weights = update_data_weights(unlabel_loader, model, ema_model, previous_weights, args.alpha)
             train_loader, eval_loader, unlabel_loader = create_data_loaders(**dataset_config, weights = weights, args=args)
             previous_weights = weights
 
@@ -141,7 +141,7 @@ def main(context):
         with open(f,"a+") as file:
             file.write('epoch: %d\t'%(epoch + 1) + 'best_prec1: %.2f'%best_prec1+"\n") 
 
-def update_data_weights(unlabel_loader, model, ema_model, previous_weights): 
+def update_data_weights(unlabel_loader, model, ema_model, previous_weights, alpha): 
     weight = torch.FloatTensor()
     sm = torch.nn.Softmax(dim = 1)
     sm0 = torch.nn.Softmax(dim = 0)
@@ -155,7 +155,7 @@ def update_data_weights(unlabel_loader, model, ema_model, previous_weights):
             variance = torch.sum(kl_distance(log_sm(pred1), sm(pred2)), dim=1)
             mean_variance = variance.cpu()
             weight = torch.cat( (weight, mean_variance), dim = 0)
-    weight = (sm0(weight) + previous_weights)*0.5
+    weight = (sm0(alpha*weight) + previous_weights)*0.5
     return weight
 
 def parse_dict_args(**kwargs):
