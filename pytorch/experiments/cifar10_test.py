@@ -24,7 +24,7 @@ def parameters():
     defaults = {
         # Technical details
         'workers': 2,
-        'checkpoint_epochs': 20,
+        'checkpoint_epochs': 100,
 
         # Data
         'dataset': 'cifar10',
