@@ -32,8 +32,8 @@ from mean_teacher.utils import *
 LOG = logging.getLogger('main')
 
 args = None
-best_prec1 = 0
 global_step = 0
+best_prec1 = 0
 
 
 def main(context):
@@ -98,6 +98,7 @@ def main(context):
         validate(eval_loader, ema_model, ema_validation_log, global_step, args.start_epoch)
         return
 
+    best_prec1 = 0
     for epoch in range(args.start_epoch, args.epochs):
         start_time = time.time()
         # train for one epoch
