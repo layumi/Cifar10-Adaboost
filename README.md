@@ -5,7 +5,8 @@
 
 [Adaptive Boosting for Domain Adaptation: Towards Robust Predictions in Scene Segmentation](https://arxiv.org/abs/2103.15685)
 
-The method is designed for domain adaptation segmentation. It also can be applied to the semi-supervised setting on Cifar-10.
+The method is designed for domain adaptation segmentation (https://github.com/layumi/AdaBoost_Seg).
+It also can be applied to the semi-supervised setting on Cifar-10.
 
 ### Mean Teacher Baseline
 ```bash
