@@ -1,7 +1,7 @@
-## Adaboost Teacher 
+## Adaboost Teacher (on Cifar-10)
 
-![](pipeline.png)
-In this repo, we provide the code for the paper [Adaptive Boosting for Domain Adaptation: Towards Robust Predictions in Scene Segmentation](https://arxiv.org/abs/2103.15685).
+![](https://github.com/layumi/AdaBoost_Seg/blob/master/pipeline.png)
+
 
 [Adaptive Boosting for Domain Adaptation: Towards Robust Predictions in Scene Segmentation](https://arxiv.org/abs/2103.15685)
 
