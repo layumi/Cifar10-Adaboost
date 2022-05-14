@@ -27,3 +27,9 @@ Mean Teacher ResNet-26	     | **6.28 ± 0.15**
 Mean Teacher ResNet-26 (Our Re-implementation with 3 GPU)      | **6.14 ± 0.24**
 Adaboost Teacher ResNet-26 (Our Re-implementation with 3 GPU)       | **6.05 ± 0.12**
 All labels, state of the art [\[paper\]](https://arxiv.org/abs/1705.07485) | 2.86
+
+
+### Acknowledge 
+This code is largely borrowed from [Mean Teacher](https://github.com/CuriousAI/mean-teacher) for a fair comparison. 
+We really appreciate the author to make the implementation open-source!
+
