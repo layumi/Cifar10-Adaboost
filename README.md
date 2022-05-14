@@ -1,5 +1,8 @@
 ## Adaboost Teacher 
 
+![](pipeline.png)
+In this repo, we provide the code for the paper [Adaptive Boosting for Domain Adaptation: Towards Robust Predictions in Scene Segmentation](https://arxiv.org/abs/2103.15685).
+
 [Adaptive Boosting for Domain Adaptation: Towards Robust Predictions in Scene Segmentation](https://arxiv.org/abs/2103.15685)
 
 The method is designed for domain adaptation segmentation. It also can be applied to the semi-supervised setting on Cifar-10.
